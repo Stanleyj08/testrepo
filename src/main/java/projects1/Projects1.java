@@ -1,23 +1,31 @@
 package projects1;
 
 import java.math.BigDecimal;
+import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
 import java.util.Scanner;
+import java.util.Set;
 
+import projects1.entity.Projecttable;
 import projects1.exception.DbException;
 import projects1.service.Projects1Service;
 
 //import projects1.dao.DbConnection;
 
-public class Projects1  {
-	
+public class Projects1 extends Projecttable {
+	private Projects1 curProject;
 		// TODO Auto-generated method stub
 		//DbConnection.getConnection();
 		//@formatter:off
-	 List<String> operations = List.of(
+	
+	//Set<Integer> intss = new HashSet<Integer>();
+	List<String> operations = List.of(
 				 
-				 "1) Add a Project"
+				 "1) Add a Project",
+				 "2)List Projects",
+				 "3)Select a project"
 				
 				);
 		 
@@ -29,14 +37,18 @@ private static Scanner scanner = new Scanner(System.in);
 	public static void main(String[] args) {
 		// TODO Auto-generated method stub
 		//DbConnection.getConnection();
+		
+		
 		//@formatter:off
 	 List<String> operations = List.of(
 				 
 				 "1) Add a Project"
 				
+				 
 				); 
 	//@formatter:on
 		new Projects1().processUserSelection();
+		//created a instance off the app and calls the menu
 		
 	}
 	
@@ -56,6 +68,11 @@ private static Scanner scanner = new Scanner(System.in);
 			case 1:
 				 createProject();
 				break;
+			case 2:
+				listProjects();
+				break;
+			case 3:
+				selectProject();
 				default:
 					System.out.println("/n" + " " + selection + " " + "is not valid. Try again.");
 			}
@@ -66,6 +83,32 @@ private static Scanner scanner = new Scanner(System.in);
 	}
 	
 
+		
+	
+
+	private void selectProject() {
+		// TODO Auto-generated method stub
+		listProjects();
+		Integer projectId = getIntInput("enter a project id ");
+		 curProject = null;
+		 curProject = Projects1Service.fethProjectById(projectId);
+	}
+	
+	
+	private void listProjects() {
+List<Projects1> projects = Projects1Service.fetchAllProjects();
+		
+		System.out.println("\nProjects:");
+		
+		for(Projects1 project : projects)	{
+			System.out.println(project);
+		}
+		//projects.forEach(project -> System.out.println("  " + project.getProjectId()+ ": " + project.getProjectName()));
+			//	.println("  " + project.getProjectId()
+				//	+ ": " + project.getProjectName()));
+		
+	}
+
 	private void createProject() {
 		// TODO Auto-generated method stub
 		String projectName = getStringInput("Enter the project name");
@@ -73,7 +116,21 @@ private static Scanner scanner = new Scanner(System.in);
 		BigDecimal actualHours = getDecimalInput("Enter the actual hours");
 		Integer difficulty = getIntInput("Enter the project difficulty (1-5)");
 		String notes = getStringInput("Enter the project notes");
-	}
+		
+		Projects1 project = new Projects1();
+		
+		project.setProjectName(projectName);
+		project.setEstimatedHours(estimatedHours);
+		project.setActualHours(actualHours);
+		project.setDifficulty(difficulty);
+		project.setNotes(notes);
+		
+		Projects1 dbProject = Projects1Service.addProject(project);
+		System.out.println("You have successfully created project:" +  dbProject);
+		
+		
+	}//same as getintinput had to create this method since the first option of the menu uses 
+	//big decimal datat type
 	private BigDecimal getDecimalInput(String string) {
 		// TODO Auto-generated method stub
 		String input = getStringInput(string);
@@ -105,7 +162,13 @@ System.out.println(   "exiting the menu." );
 		System.out.println();
 		System.out.println("Here is what you can do:");
 		//this is a lambda expression
-		operations.forEach(op -> System.out.println(op));//basically an enhanced for loop for the list at the top(operations)
+		operations.forEach(op -> System.out.println(op ));//basically an enhanced for loop for the list at the top(operations)
+	if(Objects.isNull(curProject))	{
+		System.out.println("\n you are not working with a project.");
+	} else {
+		System.out.println("\nyou are working with Project:" + curProject);
+	}
+		
 		//for each element of line print out that element// it will print out each instance in that list(operations)
 	}
 	protected  Integer getIntInput(String prompt) {
@@ -137,59 +200,62 @@ System.out.println(   "exiting the menu." );
 		Projects1.scanner = scanner;
 	}
 
+	public int getProjectId(Integer projectId) {
+		return projectId;
+		
+	}
+	@SuppressWarnings("unchecked")
 	public void setProjectId(Integer projectId) {
 		// TODO Auto-generated method stub
-		
+		this.projectId = projectId;
 	}
-
+ 
 	public Object getProjectname() {
 		// TODO Auto-generated method stub
-		return null;
+		return projectName;
 	}
 
-	public Object getEstimatedHours() {
+	public BigDecimal getEstimatedHours() {
 		// TODO Auto-generated method stub
-		return null;
+		return estimatedHours;
 	}
 
-	public Object getActualHours() {
+	public BigDecimal getActualHours() {
 		// TODO Auto-generated method stub
-		return null;
+		return actualHours;
 	}
 
-	public Object getDifficulty() {
+	public Integer getDifficulty() {
 		// TODO Auto-generated method stub
-		return null;
+		return difficulty;
 	}
 
-	public Object getNotes() {
-		// TODO Auto-generated method stub
-		return null;
-	}
 
+	@SuppressWarnings("unchecked")
 	public void setProjectName(String projectName) {
-		// TODO Auto-generated method stub
+		this.projectName = projectName;
 		
 	}
 
+	@SuppressWarnings("unchecked")
 	public void setEstimatedHours(BigDecimal estimatedHours) {
 		// TODO Auto-generated method stub
-		
+		  
+			    this.estimatedHours = estimatedHours;
 	}
 
+	@SuppressWarnings("unchecked")
 	public void setActualHours(BigDecimal actualHours) {
-		// TODO Auto-generated method stub
+		this.actualHours = actualHours;
 		
 	}
 
+	@SuppressWarnings("unchecked")
 	public void setDifficulty(Integer difficulty) {
 		// TODO Auto-generated method stub
-		
+		this.difficulty = difficulty;
 	}
 
-	public void setNotes(String notes) {
-		// TODO Auto-generated method stub
-		
-	}
+
 	
 }
