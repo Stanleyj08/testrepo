@@ -8,7 +8,7 @@ import java.util.Locale.Category;
 import projects1.entity.Materialtable.Material;
 
 public class Projecttable<Step> {
-	protected Integer projectId;
+	protected Integer projectsId;
 	  protected String projectName;
 	  protected BigDecimal estimatedHours;
 	  protected BigDecimal actualHours;
@@ -20,11 +20,11 @@ public class Projecttable<Step> {
 	  private List<Category> categories = new LinkedList<>();
 
 	  public Integer getProjectId() {
-	    return projectId;
+	    return projectsId;
 	  }
 
 	  public void setProjectId(Integer projectId) {
-	    this.projectId = projectId;
+	    this.projectsId = projectId;
 	  }
 
 	  public String getProjectName() {
@@ -83,7 +83,7 @@ public class Projecttable<Step> {
 	  public String toString() {
 	    String result = "";
 	    
-	    result += "\n   ID=" + projectId;
+	    result += "\n   ID=" + projectsId;
 	    result += "\n   name=" + projectName;
 	    result += "\n   estimatedHours=" + estimatedHours;
 	    result += "\n   actualHours=" + actualHours;

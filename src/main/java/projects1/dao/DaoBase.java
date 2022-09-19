@@ -41,7 +41,7 @@ package projects1.dao;
 	   * @param conn The connection on which to commit the transaction.
 	   * @throws SQLException Thrown if an error occurs committing the transaction.
 	   */
-	  protected void commitTransaction(Connection conn) throws SQLException {
+	  protected static void commitTransaction(Connection conn) throws SQLException {
 	    conn.commit();
 	  }
 
@@ -69,7 +69,7 @@ package projects1.dao;
 	   *        the type in case the parameter is null.
 	   * @throws SQLException Thrown if an error occurs.
 	   */
-	  protected void setParameter(PreparedStatement stmt, int parameterIndex, Object value,
+	  protected static void setParameter(PreparedStatement stmt, int parameterIndex, Object value,
 	      Class<?> classType) throws SQLException {
 	    int sqlType = convertJavaClassToSqlType(classType);
 
@@ -110,7 +110,7 @@ package projects1.dao;
 	   * @param classType The class type
 	   * @return A java.sql.Types value
 	   */
-	  private int convertJavaClassToSqlType(Class<?> classType) {
+	  private static int convertJavaClassToSqlType(Class<?> classType) {
 	    if(Integer.class.equals(classType)) {
 	      return Types.INTEGER;
 	    }

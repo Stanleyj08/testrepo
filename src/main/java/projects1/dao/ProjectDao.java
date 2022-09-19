@@ -21,16 +21,16 @@ import projects1.exception.DbException;
 public class ProjectDao extends DaoBase {
 	private static final String CATEGORY_TABLE = "category";
 	private static final String MATERIAL_TABLE = "material";
-	private static final String PROJECT_TABLE = "project";
-	private static final String PROJECT_CATEGORY_TABLE = "project_category";
+	private static final String PROJECTS_TABLE = "projects";
+	private static final String PROJECT_CATEGORY_TABLE = "projects_category";
 	private static final String STEP_TABLE = "step";
 	
 	public Projects1 insertProject(Projects1 project) 	{
 		
 		//formatter:off
 		String sql = ""
-				+ "INSERT INTO " + PROJECT_TABLE + " "
-				+ "(project_name, estimated_hours, actual_hours, difficulty, notes) "
+				+ "INSERT INTO " + PROJECTS_TABLE + " "
+				+ "(projectsName, estimatedHours, actualHours, difficulty, notes) "
 				+ "VALUES "
 				+ "(?, ?, ?, ?, ?)";
 		//formatter:on
@@ -47,7 +47,7 @@ public class ProjectDao extends DaoBase {
 				//execute update performs the insert
 				stmt.executeUpdate();
 				//counts when a row is added and adds the int of the row to the entity object
-				Integer projectId = getLastInsertId(conn, PROJECT_TABLE);
+				Integer projectId = getLastInsertId(conn, PROJECTS_TABLE);
 				//to keep track of the id call the lastinsert method and pass in the connection
 				commitTransaction(conn);
 				//commit transactions writes all changes to the data base
@@ -84,7 +84,7 @@ public  void executeBatch(List<String> sqlBatch) {
 
 public static List<Projects1> fetchAllProjects() {
 	// TODO Auto-generated method stub
-	String sql = "SELECT * FROM " + PROJECT_TABLE + " ORDER BY project_name";
+	String sql = "SELECT * FROM " + PROJECTS_TABLE + " ORDER BY projects_name";
 	
 	try(Connection conn = DbConnection.getConnection()) {
 		startTransaction(conn);
@@ -93,7 +93,7 @@ public static List<Projects1> fetchAllProjects() {
 			try(ResultSet rs = stmt.executeQuery()) {
 				List<Projects1> projects = new LinkedList<>();
 				
-				while(rs.next()) {
+				while(rs.next()) {//each row of data in the result set is added to the list projects
 					projects.add(extract(rs, Projects1.class));
 				}
 				return projects;
@@ -114,7 +114,7 @@ public static List<Projects1> fetchAllProjects() {
 	}
 	
 	public java.util.Optional<Projects1> fetchProjectById(Integer projectId) {
-		String sql = "SELECT * FROM " + PROJECT_TABLE + " WHERE project_id = ?";
+		String sql = "SELECT * FROM " + PROJECTS_TABLE + " WHERE projects_id = ?";
 		
 		try(Connection conn = DbConnection.getConnection())	{
 			startTransaction(conn);
@@ -123,13 +123,13 @@ public static List<Projects1> fetchAllProjects() {
 				Projects1 project = null;
 				 try(PreparedStatement stmt = conn.prepareStatement(sql)){
 					 setParameter(stmt, 1, projectId, Integer.class);
-					 
+					 //the parameter is set on the passed in value
 					 try(ResultSet rs = stmt.executeQuery())	{
 						//If the ResultSet has a row in it (rs.next()) set the Project variable to a new Project object and 
 						 //set all fields from values in the ResultSet.  call the extract() method for this.
 						 if(rs.next()) {
 							 project = extract(rs, Projects1.class);
-							 
+							
 						 }
 					 }
 				 }
@@ -139,6 +139,7 @@ public static List<Projects1> fetchAllProjects() {
 					 project.getMaterials().addAll(fetchMaterialForProject(conn, projectId));
 					 project.getSteps().addAll(fetchStepsForProject(conn, projectId));
 					 project.getCategories().addAll(fetchCategoriesForProject(conn, projectId));
+					 
 				 }
 				 commitTransaction(conn);
 				 return java.util.Optional.ofNullable(project);
@@ -158,7 +159,7 @@ public static List<Projects1> fetchAllProjects() {
 		}
 		}
 	private List<Material> fetchMaterialForProject(Connection conn, Integer projectId) throws SQLException {
-		String sql= "" + "SELECT c.* FROM" + MATERIAL_TABLE + "JOIN" + PROJECT_TABLE + "pc USING (category_id) " + "WHERE project_id = ?";
+		String sql= "" + "SELECT c.* FROM" + MATERIAL_TABLE + "JOIN" + PROJECTS_TABLE + "pc USING (category_id) " + "WHERE projects_id = ?";
 		try(PreparedStatement stmt = conn.prepareStatement(sql))	{
 			setParameter(stmt, 1, projectId, Integer.class);
 			try(ResultSet rs = stmt.executeQuery()){
@@ -174,7 +175,7 @@ public static List<Projects1> fetchAllProjects() {
 		
 	}
 	private List<Step> fetchStepsForProject(Connection conn, Integer projectId) throws SQLException {
-		String sql= "" + "SELECT c.* FROM" + STEP_TABLE + "JOIN" + PROJECT_TABLE + "pc USING (category_id) " + "WHERE project_id = ?";
+		String sql= "" + "SELECT c.* FROM" + STEP_TABLE + "JOIN" + PROJECTS_TABLE + "pc USING (category_id) " + "WHERE projects_id = ?";
 		try(PreparedStatement stmt = conn.prepareStatement(sql))	{
 			setParameter(stmt, 1, projectId, Integer.class);
 			try(ResultSet rs = stmt.executeQuery()){
@@ -201,8 +202,69 @@ public static List<Projects1> fetchAllProjects() {
 				return categories;
 	}
 	
-	
+	//update part of crud down below
 }
+	}
+	public static boolean modifyProjectDetails(Projects1 project) {
+		String sql =""
+				+"UPDATE " + PROJECTS_TABLE + " SET "
+				+ "projectname = ?, "
+				+"estimatedhours = ?, "
+				+"actualhours = ?, "
+				+"difficulty = ?, "
+				+"notes = ? "
+				+"WHERE project_id = ?";
+		try(Connection conn = DbConnection.getConnection())	{
+			startTransaction(conn);
+			
+			try(PreparedStatement stmt = conn.prepareStatement(sql))	{
+				setParameter(stmt, 1, project.getProjectName(), String.class);
+				setParameter(stmt, 2, project.getEstimatedHours(), BigDecimal.class);
+				setParameter(stmt, 3, project.getActualHours(), BigDecimal.class);
+				setParameter(stmt, 4, project.getDifficulty(), Integer.class);
+				setParameter(stmt, 5, project.getNotes(), String.class);
+				setParameter(stmt, 6, project.getProjectId(), Integer.class);
+				
+				boolean modified = stmt.executeUpdate() == 1;
+				
+				commitTransaction(conn);
+				
+				return modified;
+				
+			}
+			catch(Exception e) {
+				rollbackTransaction(conn);
+				throw new DbException(e);
+			}
+			
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			throw new DbException(e);
+		}
+		
+		
+	}
+	public static boolean deleteProject(Integer projectId) {
+		String sql = "DELETE FROM " + PROJECTS_TABLE + " WHERE projects_id = ?";
+		try(Connection conn = DbConnection.getConnection())	{
+			try(PreparedStatement stmt = conn.prepareStatement(sql))	{
+				setParameter(stmt, 1, projectId, Integer.class);
+				
+				boolean deleted = stmt.executeUpdate() == 1;
+				
+				commitTransaction(conn);
+				return deleted;
+				
+			}
+			catch(Exception e) {
+				//rollbackTransaction(conn);
+				throw new DbException(e);
+			}
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			throw new DbException(e);
+		}
+	
 	}
 }
 	

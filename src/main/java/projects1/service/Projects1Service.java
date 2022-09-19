@@ -24,55 +24,46 @@ public class Projects1Service extends Projects1 {
 		return projectDao.insertProject(project);
 		
 	}
-private void createProject() {
-	String projectName = getStringInput("Enter the project name");
-	BigDecimal estimatedHours = getDecimalInput("enter the estimated hours");
-	BigDecimal actualHours = getDecimalInput("Enter the actual hours");
-	Integer difficulty = getIntInput("Enter the project difficulty (1-5)");
-	String notes = getStringInput("Enter the project notes");
-	
-	Projects1 project = new Projects1();
-	
-	project.setProjectName(projectName);
-	project.setEstimatedHours(estimatedHours);
-	project.setActualHours(actualHours);
-	project.setDifficulty(difficulty);
-	project.setNotes(notes);
-	
-	Projects1 dbProject = Projects1Service.addProject(project);
-	System.out.println("You have successfully created project:" +  dbProject);
-	
-}
+
+
 
 public static Projects1 addProject(Projects1 project) {
 	
 	return project;
 }
 
-private BigDecimal getDecimalInput(String string) {
-	// TODO Auto-generated method stub
-	String input = getStringInput(string);
-	if(Objects.isNull(input))	{
-		return null;
-	}
-	try {
-	return new BigDecimal(string).setScale(2);
-	}//set scale will take the original value and return something that looks a bit different but is the same number essentially. The new number depends on the scale
-	catch(NumberFormatException e)	{
-		throw new DbException(input + "is not a valid decimal number");
-	}
-}
+
+
 public static List<Projects1> fetchAllProjects() {
 	
 	return ProjectDao.fetchAllProjects();
 
 }
-public static Projects1 fethProjectById(Integer projectId) {
+public static Projects1 fetchProjectById(Integer projectId) {
 	return projectDao.fetchProjectById(projectId).orElseThrow(	() -> new NoSuchElementException("Project with project Id= " + projectId + " does not exist."));
 		
 		
 	
 
+}
+
+
+
+public static void modifyProjectDetails(Projects1 project) {
+if(!ProjectDao.modifyProjectDetails(project))	{
+	throw new DbException("Project with ID=" + project.getProjectId() + " does not exist.");
+}
+
+	
+}
+
+
+
+public static void deleteProject(Integer projectId) {
+	if(!ProjectDao.deleteProject(projectId))	{
+		throw new DbException("project with ID=" + projectId + " does not exist.");
+	}
+	
 }
 
 //private  final String SCHEMA_FILE = "projects_schema.sql";//this allows us to pick up the specific file passed in
